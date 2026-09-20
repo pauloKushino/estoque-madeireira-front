@@ -1,59 +1,41 @@
-# EstoqueMadeireiraFront
+# Estoque Madeireira — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.27.
+Interface web para o sistema de controle de estoque de uma madeireira, consumindo a API Spring Boot.
 
-## Development server
+## Stack
 
-To start a local development server, run:
+- Angular 19 (componentes standalone, sem NgModules)
+- MDBootstrap (mdb-angular-ui-kit) para componentes visuais
+- SweetAlert2 para alertas (via `AlertService`)
+- RxJS + HttpClient com interceptor global de erros
 
-```bash
-ng serve
+## Como rodar
+
+Pré-requisitos: Node.js 20+ e o backend no ar (veja o repositório do backend).
+
+```powershell
+npm install
+npm start          # http://localhost:4200
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Login de teste (mockado no front): **admin / 1234**
 
-## Code scaffolding
+## Estrutura
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```
+src/app/
+├── core/        layout (navbar/sidebar), guards, interceptors, AlertService
+├── services/    AuthService + services HTTP da API
+├── models/      interfaces TypeScript dos DTOs
+├── shared/      (componentes reutilizaveis futuros)
+├── produtos/    listagem, CRUD, filtro por nome, badge de estoque baixo
+├── clientes/    listagem, CRUD, busca de endereco por CEP (ViaCEP)
+├── vendas/      listagem, detalhes, nova venda com itens dinamicos
+└── auth/login/  tela de login (fora do layout principal)
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Decisoes tecnicas
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Erros HTTP (4xx/5xx) sao tratados uma unica vez no `errorInterceptor` (exibe a mensagem `message` da ApiError do backend) — os componentes nao repetem alertas.
+- Rotas protegidas por `authGuard` (flag em `localStorage`); autenticacao mockada apenas para fins academicos.
+- A URL da API fica em `src/environments/environment.ts`.
