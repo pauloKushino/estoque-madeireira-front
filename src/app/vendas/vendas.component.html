@@ -1,6 +1,171 @@
 <div class="card">
   <div class="card-body">
-    <h4 class="card-title">Vendas</h4>
-    <p class="card-text text-muted">Modulo em construcao: registro e consulta de vendas serao implementados aqui.</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="card-title mb-0">Vendas</h4>
+      <button type="button" class="btn btn-primary" (click)="abrirNovaVenda()" [disabled]="formVisivel">
+        Nova Venda
+      </button>
+    </div>
+
+    @if (formVisivel) {
+      <div class="border rounded p-3 mb-4 bg-light">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Nova Venda</h5>
+          <button type="button" class="btn-close" aria-label="Fechar" (click)="fecharFormulario()" [disabled]="registrando"></button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="registrar()">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="venda-cliente" class="form-label">Cliente</label>
+              <select id="venda-cliente" class="form-select" formControlName="clienteId">
+                <option [ngValue]="null" disabled>Selecione um cliente</option>
+                @for (cliente of clientes; track cliente.id) {
+                  <option [ngValue]="cliente.id">{{ cliente.nome }}</option>
+                }
+              </select>
+              @if (campoInvalido('clienteId')) {
+                <small class="text-danger">Selecione um cliente.</small>
+              }
+            </div>
+          </div>
+
+          <label class="form-label mb-2">Itens da venda</label>
+          <div formArrayName="itens">
+            @for (item of itens.controls; track item; let i = $index) {
+              <div class="row g-2 align-items-start mb-2" [formGroupName]="i">
+                <div class="col-md-5">
+                  <select class="form-select" formControlName="produtoId">
+                    <option [ngValue]="null" disabled>Selecione um produto</option>
+                    @for (produto of produtos; track produto.id) {
+                      <option [ngValue]="produto.id">{{ descricaoEstoque(produto) }}</option>
+                    }
+                  </select>
+                  @if (itemInvalido(item, 'produtoId')) {
+                    <small class="text-danger">Selecione um produto.</small>
+                  }
+                </div>
+                <div class="col-md-2">
+                  <input
+                    type="number"
+                    class="form-control"
+                    formControlName="quantidade"
+                    min="0"
+                    step="any"
+                    placeholder="Qtd."
+                  >
+                  @if (itemInvalido(item, 'quantidade')) {
+                    <small class="text-danger">Informe uma quantidade maior que zero.</small>
+                  }
+                </div>
+                <div class="col-md-3 text-md-end pt-2">
+                  <span class="text-muted d-none d-md-inline">Subtotal: </span>
+                  <strong>{{ subtotalItem(item) | currency:'BRL' }}</strong>
+                </div>
+                <div class="col-md-2 text-md-end">
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    (click)="removerItem(i)"
+                    [disabled]="itens.length === 1"
+                    title="Remover item"
+                  >
+                    Remover
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="adicionarItem()">
+            Adicionar item
+          </button>
+
+          <hr>
+
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0">Total: {{ totalVenda | currency:'BRL' }}</h5>
+            <div>
+              <button type="button" class="btn btn-outline-secondary me-2" (click)="fecharFormulario()" [disabled]="registrando">
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="form.invalid || registrando || carregandoProdutos">
+                {{ registrando ? 'Registrando...' : 'Registrar Venda' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    }
+
+    @if (carregando) {
+      <div class="d-flex align-items-center gap-2 text-muted">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        Carregando vendas...
+      </div>
+    } @else if (vendas.length === 0) {
+      <p class="text-muted mb-0">Nenhuma venda registrada.</p>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th scope="col">#ID</th>
+              <th scope="col">Data</th>
+              <th scope="col">Cliente</th>
+              <th scope="col" class="text-end">Valor total</th>
+              <th scope="col" class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (venda of vendas; track venda.id) {
+              <tr>
+                <td>#{{ venda.id }}</td>
+                <td>{{ venda.dataVenda | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ nomeCliente(venda.clienteId) }}</td>
+                <td class="text-end">{{ venda.valorTotal | currency:'BRL' }}</td>
+                <td class="text-end">
+                  <button type="button" class="btn btn-outline-primary btn-sm" (click)="alternarDetalhes(venda.id)">
+                    {{ vendaExpandidaId === venda.id ? 'Ocultar' : 'Detalhes' }}
+                  </button>
+                </td>
+              </tr>
+              @if (vendaExpandidaId === venda.id) {
+                <tr class="detalhes-venda">
+                  <td colspan="5">
+                    <table class="table table-sm table-striped align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th scope="col">Produto</th>
+                          <th scope="col" class="text-end">Quantidade</th>
+                          <th scope="col" class="text-end">Preço no momento</th>
+                          <th scope="col" class="text-end">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (item of venda.itens; track item.id) {
+                          <tr>
+                            <td>{{ item.nomeProduto }}</td>
+                            <td class="text-end">{{ item.quantidade | number }}</td>
+                            <td class="text-end">{{ item.precoUnitarioNoMomento | currency:'BRL' }}</td>
+                            <td class="text-end">{{ item.subtotal | currency:'BRL' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th colspan="3" class="text-end">Valor total</th>
+                          <th class="text-end">{{ venda.valorTotal | currency:'BRL' }}</th>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 </div>
