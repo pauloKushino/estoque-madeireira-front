@@ -1,0 +1,9 @@
+.sidebar {
+  width: 220px;
+  min-height: calc(100vh - 56px);
+}
+
+.sidebar .list-group-item.active {
+  background-color: #3b71ca;
+  border-color: #3b71ca;
+}

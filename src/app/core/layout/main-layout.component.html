@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">Estoque Madeireira</a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      (click)="menuMobile.toggle()"
+      aria-label="Abrir menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" mdbCollapse #menuMobile="mdbCollapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/produtos" routerLinkActive="active">Produtos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/clientes" routerLinkActive="active">Clientes</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/vendas" routerLinkActive="active">Vendas</a>
+        </li>
+      </ul>
+      <button type="button" class="btn btn-outline-light" (click)="sair()">Sair</button>
+    </div>
+  </div>
+</nav>
+
+<div class="d-flex">
+  <aside class="sidebar d-none d-lg-block bg-light border-end">
+    <div class="list-group list-group-flush">
+      <a routerLink="/produtos" routerLinkActive="active"
+         class="list-group-item list-group-item-action">Produtos</a>
+      <a routerLink="/clientes" routerLinkActive="active"
+         class="list-group-item list-group-item-action">Clientes</a>
+      <a routerLink="/vendas" routerLinkActive="active"
+         class="list-group-item list-group-item-action">Vendas</a>
+    </div>
+  </aside>
+
+  <main class="flex-grow-1 p-4">
+    <router-outlet></router-outlet>
+  </main>
+</div>

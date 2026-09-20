@@ -1,0 +1,25 @@
+<div class="login-wrapper d-flex justify-content-center align-items-center">
+  <div class="card shadow-4 login-card">
+    <div class="card-body p-4">
+
+      <h4 class="text-center mb-1">Estoque Madeireira</h4>
+      <p class="text-center text-muted mb-4">Acesse sua conta</p>
+
+      <form [formGroup]="form" (ngSubmit)="entrar()">
+        <mdb-form-control class="mb-4">
+          <input mdbInput type="text" id="usuario" class="form-control" formControlName="usuario" />
+          <label mdbLabel class="form-label" for="usuario">Usuario</label>
+        </mdb-form-control>
+
+        <mdb-form-control class="mb-4">
+          <input mdbInput type="password" id="senha" class="form-control" formControlName="senha" />
+          <label mdbLabel class="form-label" for="senha">Senha</label>
+        </mdb-form-control>
+
+        <button type="submit" class="btn btn-primary btn-block w-100">Entrar</button>
+      </form>
+
+      <p class="text-center text-muted small mt-3 mb-0">Acesso de teste: admin / 1234</p>
+    </div>
+  </div>
+</div>
