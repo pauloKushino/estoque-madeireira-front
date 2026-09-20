@@ -1,6 +1,219 @@
-<div class="card">
+<div class="card mb-4">
   <div class="card-body">
-    <h4 class="card-title">Clientes</h4>
-    <p class="card-text text-muted">Modulo em construcao: cadastro de clientes (com consulta de CEP) sera implementado aqui.</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="card-title mb-0">Clientes</h4>
+      <button type="button" class="btn btn-primary" (click)="abrirNovo()">Novo Cliente</button>
+    </div>
+
+    <div class="row align-items-end mb-3">
+      <div class="col-md-4">
+        <mdb-form-control>
+          <input
+            mdbInput
+            type="text"
+            class="form-control"
+            id="filtroNome"
+            [formControl]="filtroNome"
+            (keydown.enter)="buscar()" />
+          <label mdbLabel class="form-label" for="filtroNome">Filtrar por nome</label>
+        </mdb-form-control>
+      </div>
+      <div class="col-md-8">
+        <button type="button" class="btn btn-primary me-2" (click)="buscar()">Buscar</button>
+        <button type="button" class="btn btn-secondary" (click)="limparFiltro()">Limpar</button>
+      </div>
+    </div>
+
+    @if (carregando) {
+      <div class="d-flex justify-content-center my-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>CPF/CNPJ</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+              <th>Cidade/UF</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cliente of clientes; track cliente.id) {
+              <tr>
+                <td>{{ cliente.nome }}</td>
+                <td>{{ valorOuTraco(cliente.cpfCnpj) }}</td>
+                <td>{{ valorOuTraco(cliente.telefone) }}</td>
+                <td>{{ valorOuTraco(cliente.email) }}</td>
+                <td>{{ cidadeUf(cliente) }}</td>
+                <td class="text-end">
+                  <button type="button" class="btn btn-primary btn-sm me-2" (click)="abrirEdicao(cliente)">Editar</button>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="excluir(cliente)">Excluir</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (clientes.length === 0) {
+        <p class="text-muted mb-0">Nenhum cliente encontrado.</p>
+      }
+    }
   </div>
 </div>
+
+@if (formVisivel) {
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-3">{{ clienteEmEdicao ? 'Editar cliente' : 'Novo cliente' }}</h5>
+
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="row">
+          <div class="col-md-6">
+            <mdb-form-control class="mb-3">
+              <input mdbInput type="text" class="form-control" formControlName="nome" id="nome" />
+              <label mdbLabel class="form-label" for="nome">Nome *</label>
+            </mdb-form-control>
+            @if (campoInvalido('nome')) {
+              <div class="text-danger small mt-n3 mb-3">
+                @if (temErro('nome', 'required')) {
+                  <div>Nome é obrigatório.</div>
+                }
+                @if (temErro('nome', 'maxlength')) {
+                  <div>Nome deve ter no máximo 120 caracteres.</div>
+                }
+              </div>
+            }
+          </div>
+          <div class="col-md-3">
+            <mdb-form-control class="mb-3">
+              <input mdbInput type="text" class="form-control" formControlName="cpfCnpj" id="cpfCnpj" />
+              <label mdbLabel class="form-label" for="cpfCnpj">CPF/CNPJ</label>
+            </mdb-form-control>
+            @if (campoInvalido('cpfCnpj')) {
+              <div class="text-danger small mt-n3 mb-3">
+                @if (temErro('cpfCnpj', 'maxlength')) {
+                  <div>CPF/CNPJ deve ter no máximo 18 caracteres.</div>
+                }
+              </div>
+            }
+          </div>
+          <div class="col-md-3">
+            <mdb-form-control class="mb-3">
+              <input mdbInput type="text" class="form-control" formControlName="telefone" id="telefone" />
+              <label mdbLabel class="form-label" for="telefone">Telefone</label>
+            </mdb-form-control>
+            @if (campoInvalido('telefone')) {
+              <div class="text-danger small mt-n3 mb-3">
+                @if (temErro('telefone', 'maxlength')) {
+                  <div>Telefone deve ter no máximo 20 caracteres.</div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <mdb-form-control class="mb-3">
+              <input mdbInput type="email" class="form-control" formControlName="email" id="email" />
+              <label mdbLabel class="form-label" for="email">E-mail</label>
+            </mdb-form-control>
+            @if (campoInvalido('email')) {
+              <div class="text-danger small mt-n3 mb-3">
+                @if (temErro('email', 'email')) {
+                  <div>Informe um e-mail válido.</div>
+                }
+              </div>
+            }
+          </div>
+          <div class="col-md-3">
+            <mdb-form-control class="mb-3">
+              <input
+                mdbInput
+                type="text"
+                class="form-control"
+                formControlName="cep"
+                id="cep"
+                placeholder="00000-000" />
+              <label mdbLabel class="form-label" for="cep">CEP</label>
+            </mdb-form-control>
+            @if (campoInvalido('cep')) {
+              <div class="text-danger small mt-n3 mb-3">
+                @if (temErro('cep', 'pattern')) {
+                  <div>CEP inválido. Use o formato 00000-000.</div>
+                }
+              </div>
+            }
+          </div>
+          <div class="col-md-3">
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              [disabled]="form.controls.cep.invalid || buscandoCep"
+              (click)="buscarCep()">
+              @if (buscandoCep) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Buscando...
+              } @else {
+                Buscar CEP
+              }
+            </button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-5">
+            <mdb-form-control class="mb-3">
+              <input mdbInput type="text" class="form-control" formControlName="logradouro" id="logradouro" />
+              <label mdbLabel class="form-label" for="logradouro">Logradouro</label>
+            </mdb-form-control>
+          </div>
+          <div class="col-md-3">
+            <mdb-form-control class="mb-3">
+              <input mdbInput type="text" class="form-control" formControlName="bairro" id="bairro" />
+              <label mdbLabel class="form-label" for="bairro">Bairro</label>
+            </mdb-form-control>
+          </div>
+          <div class="col-md-3">
+            <mdb-form-control class="mb-3">
+              <input mdbInput type="text" class="form-control" formControlName="cidade" id="cidade" />
+              <label mdbLabel class="form-label" for="cidade">Cidade</label>
+            </mdb-form-control>
+          </div>
+          <div class="col-md-1">
+            <mdb-form-control class="mb-3">
+              <input mdbInput type="text" class="form-control" formControlName="uf" id="uf" />
+              <label mdbLabel class="form-label" for="uf">UF</label>
+            </mdb-form-control>
+            @if (campoInvalido('uf')) {
+              <div class="text-danger small mt-n3 mb-3">
+                @if (temErro('uf', 'pattern')) {
+                  <div>UF inválida.</div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-secondary me-2" (click)="fecharFormulario()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="salvando">
+            @if (salvando) {
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              Salvando...
+            } @else {
+              Salvar
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
