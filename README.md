@@ -26,6 +26,8 @@ Login de teste (mockado no front): **admin / 1234**
 
 A demo pública ainda não foi publicada. Para rodar localmente, siga os passos acima (front em http://localhost:4200 e API em http://localhost:8080/swagger-ui.html).
 
+Para publicar a demo, configure os secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID` e a variável de repositório `DEPLOY_ENABLED=true`.
+
 ## Estrutura
 
 ```
