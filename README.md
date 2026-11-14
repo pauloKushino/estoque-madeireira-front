@@ -1,7 +1,6 @@
 # Estoque Madeireira — Frontend
 
 ![CI/CD](https://github.com/pauloKushino/estoque-madeireira-front/actions/workflows/ci-cd.yml/badge.svg)
-![Vercel](https://img.shields.io/badge/Vercel-Live-brightgreen?logo=vercel)
 
 Interface web para o sistema de controle de estoque de uma madeireira, consumindo a API Spring Boot.
 
@@ -25,8 +24,7 @@ Login de teste (mockado no front): **admin / 1234**
 
 ## Demo
 
-**Live:** https://estoque-madeireira-front.vercel.app
-**API Docs:** https://estoque-madeireira-back.railway.app/swagger-ui.html
+A demo pública ainda não foi publicada. Para rodar localmente, siga os passos acima (front em http://localhost:4200 e API em http://localhost:8080/swagger-ui.html).
 
 ## Estrutura
 
